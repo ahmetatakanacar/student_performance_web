@@ -72,7 +72,7 @@ def predict_score(data: StudentData):
     if model is None:
         raise HTTPException(
             status_code=503,
-            detail="Model yüklenemedi. Lütfen model dosyasının mevcut olduğundan emin olun."
+            detail="Model yüklenemedi."
         )
     
     try:
@@ -107,3 +107,4 @@ def predict_score(data: StudentData):
             status_code=500,
             detail=f"Tahmin yapılırken hata oluştu: {str(e)}"
         )
+
