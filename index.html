@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğrenci Performans Tahmin Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #667eea;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            flex: 1;
+            background: #f8f9fa;
+        }
+
+        .radio-option:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .radio-option:has(input[type="radio"]:checked) {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .radio-option label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 15px 0;
+            color: #667eea;
+        }
+
+        .result-message {
+            color: #666;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            border-left: 4px solid #c33;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .result-score {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Öğrenci Performans Tahmin Sistemi</h1>
+        <p class="subtitle">Girdiğiniz bilgilere göre performans tahmini yapılacaktır</p>
+        
+        <form id="predictionForm">
+            <div class="form-group">
+                <label for="hours_studied">Çalışma Saatleri (Günlük)</label>
+                <input type="number" id="hours_studied" name="hours_studied" min="1" max="9" step="0.5" required>
+                <div class="input-hint">Günde kaç saat ders çalışıyorsunuz? (1-9 saat arası)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="previous_scores">Önceki Not Ortalaması</label>
+                <input type="number" id="previous_scores" name="previous_scores" min="0" max="100" step="0.1" required>
+                <div class="input-hint">Daha önceki sınavlardan aldığınız ortalama not</div>
+            </div>
+
+            <div class="form-group">
+                <label>Ders Dışı Aktiviteler</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="extracurricular_yes" name="extracurricular" value="Yes" required>
+                        <label for="extracurricular_yes">Evet</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="extracurricular_no" name="extracurricular" value="No" required>
+                        <label for="extracurricular_no">Hayır</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="sleep_hours">Uyku Saatleri (Günlük)</label>
+                <input type="number" id="sleep_hours" name="sleep_hours" min="4" max="9" step="0.5" required>
+                <div class="input-hint">Günde ortalama kaç saat uyuyorsunuz? (4-9 saat arası)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="sample_papers">Çözülen Örnek Soru Sayısı</label>
+                <input type="number" id="sample_papers" name="sample_papers" min="0" step="1" required>
+                <div class="input-hint">Toplam çözdüğünüz örnek soru sayısı</div>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">Tahmin Yap</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Tahmin yapılıyor...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="result-label">Tahmin Edilen Performans İndeksi</div>
+            <div class="result-score" id="resultScore">0</div>
+            <div class="result-message" id="resultMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultScore = document.getElementById('resultScore');
+        const resultMessage = document.getElementById('resultMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        const API_URL = 'http://localhost:8000/predict';
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            resultContainer.classList.remove('show');
+            errorMessage.classList.remove('show');
+            loading.classList.add('show');
+            submitBtn.disabled = true;
+
+            const formData = {
+                hours_studied: parseFloat(document.getElementById('hours_studied').value),
+                previous_scores: parseFloat(document.getElementById('previous_scores').value),
+                extracurricular: document.querySelector('input[name="extracurricular"]:checked').value,
+                sleep_hours: parseFloat(document.getElementById('sleep_hours').value),
+                sample_papers: parseInt(document.getElementById('sample_papers').value)
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const prediction = data.prediction;
+
+                resultScore.textContent = prediction.toFixed(2);
+                resultContainer.classList.add('show');
+                
+                let message = '';
+                if (prediction >= 90) {
+                    message = '🌟 Mükemmel! Çok başarılı bir performans bekleniyor.';
+                } else if (prediction >= 75) {
+                    message = '👍 İyi! Başarılı bir performans bekleniyor.';
+                } else if (prediction >= 60) {
+                    message = '📚 Orta seviye. Biraz daha çalışarak daha iyi sonuçlar alabilirsiniz.';
+                } else {
+                    message = '💪 Daha fazla çalışma ve düzenli bir program ile performansınızı artırabilirsiniz.';
+                }
+                resultMessage.textContent = message;
+
+            } catch (error) {
+                console.error('Hata:', error);
+                errorMessage.textContent = `Hata: ${error.message}. Lütfen FastAPI backend'inizin çalıştığından emin olun (http://localhost:8000)`;
+                errorMessage.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+            }
+        });
+
+        const inputs = document.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.validity.valid) {
+                    this.style.borderColor = '#e0e0e0';
+                } else {
+                    this.style.borderColor = '#c33';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
