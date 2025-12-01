@@ -13,8 +13,6 @@ def train_model():
       raise FileNotFoundError(f"Veri dosyası bulunamadı: {csv_file}")
         
     df = pd.read_csv(csv_file)
-    print(f"Toplam kayıt sayısı: {len(df)}")
-    print(f"Özellik sayısı: {len(df.columns) - 1}")
     
     df["Extracurricular Activities"] = df["Extracurricular Activities"].map({"Yes": 1, "No": 0})
     
@@ -25,11 +23,9 @@ def train_model():
     X = df.drop("Performance Index", axis=1)
     y = df["Performance Index"]
     
-    print(f"Feature sütunları: {list(X.columns)}")
-    print(f"Target istatistikleri:")
+    print(f"Feature: {list(X.columns)}")
     print(f"Ortalama: {y.mean():.2f}")
     print(f"Standart sapma: {y.std():.2f}")
-    print(f"Min: {y.min():.2f}, Max: {y.max():.2f}")
     
     X_train, X_test, y_train, y_test = train_test_split(
       X, y, 
@@ -49,11 +45,9 @@ def train_model():
     test_r2 = r2_score(y_test, y_pred_test)
     test_mae = mean_absolute_error(y_test, y_pred_test)
     test_rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
-    
-    print(f"\nEğitim Seti Metrikleri:")
-    print(f"R² Score: {train_r2:.4f}")
-    print(f"\nTest Seti Metrikleri:")
-    print(f"R² Score: {test_r2:.4f}")
+
+    print(f"R2 Score: {train_r2:.4f}")
+    print(f"R2 Score (Test): {test_r2:.4f}")
     print(f"Mean Absolute Error: {test_mae:.4f}")
     print(f"Root Mean Squared Error: {test_rmse:.4f}")
     
@@ -77,3 +71,4 @@ if __name__ == "__main__":
     except Exception as e:
       print(f"\nHata: {str(e)}")
       raise
+
